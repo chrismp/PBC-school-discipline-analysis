@@ -2,6 +2,7 @@
 
 require(dplyr)
 
+
 ## FUNCTIONS
 func.cors <- function(dat){
   dat.cor <- cor(
@@ -30,6 +31,17 @@ func.cors <- function(dat){
   )
   return(dat.cor)
 }
+
+func.makePunishmentRateData <- function(dat){
+  dat.output <- data.frame(
+    "Group" = c("Total","Black","Hispanic","White"),
+    "Enrollment" = c(  sum(dat$TotalEnrollment), sum(dat$BlackEnrollment), sum(dat$HispanicEnrollment), sum(dat$WhiteEnrollment) ),
+    "Punished" = c( sum(dat$TotalPunished), sum(dat$BlackStudentsPunished), sum(dat$HispanicStudentsPunished), sum(dat$WhiteStudentsPunished) )
+  )
+  dat.output$PunishmentRate <- dat.output$Punished / dat.output$Enrollment
+  return(dat.output)
+}
+
 
 ## ENROLLMENT
   dat.enrollment <- read.csv(
@@ -61,11 +73,7 @@ func.cors <- function(dat){
   dat.enrollment.summarized.WithBlack$PercentBlack <- dat.enrollment.summarized.WithBlack$BlackEnrollment / dat.enrollment.summarized.WithBlack$TotalEnrollment
   dat.enrollment.summarized.WithBlack$PercentWhite <- dat.enrollment.summarized.WithBlack$WhiteEnrollment / dat.enrollment.summarized.WithBlack$TotalEnrollment
   
-  # dat.enrollment.summarized.WithBlack.TargetDistrict <- filter(
-  #   .data = dat.enrollment.summarized.WithBlack,
-  #   District=="PALM BEACH"
-  # )
-
+  
 ## PUNISHMENT
   dat.punishment <- read.csv(
     file = "2016-17 punishment raw.csv",
@@ -90,12 +98,7 @@ func.cors <- function(dat){
   )
   dat.punishment.summarized$BlackStudentsPercentOfPunished <- dat.punishment.summarized$BlackStudentsPunished / dat.punishment.summarized$TotalPunished
   
-  # dat.punishment.summarized.TargetDistrict <- filter(
-  #   .data = dat.punishment.summarized,
-  #   District.Name=="PALM BEACH",
-  #   TotalPunished>0
-  # )
-
+  
 ## TEACHERS
   dat.teachers <- read.csv(
     file = "2016-17 teachers by race raw.csv",
@@ -104,6 +107,7 @@ func.cors <- function(dat){
   dat.teachers$TotalTeachers <- dat.teachers$White + dat.teachers$Black.or.African.American + dat.teachers$Hispanic.Latino + dat.teachers$Asian + dat.teachers$American.Indian.or.Alaska.Native + dat.teachers$Native.Hawaiian.or.Other.Pacific.Islander + dat.teachers$Two.or.More.Races
   dat.teachers$PercentWhiteTeachers <- dat.teachers$White / dat.teachers$TotalTeachers
 
+  
 # MERGE DATASETS
   dat.merge.state <- merge(
     x = dat.enrollment.summarized.WithBlack,
@@ -140,9 +144,26 @@ func.cors <- function(dat){
     District.x == "PALM BEACH"
   )
   dat.cor.pbc <- func.cors(dat.merge.pbc)
+
   
-write.csv(
-  x = dat.merge.state,
-  file = "merge.csv",
-  row.names = F
-)
+# MAKE DATAFRAMES 
+  dat.output.punishmentRates.state <- func.makePunishmentRateData(dat.merge.state)
+  dat.output.punishmentRates.pbc <- func.makePunishmentRateData(dat.merge.pbc)
+
+
+# WRITE TO CSVs
+  outputDir <- "output/"
+  write.csv(
+    x = dat.output.punishmentRates.state,
+    file = paste0(outputDir,"Punishment and enrollment by race - state.csv"),
+    row.names = F
+  )
+  write.csv(
+    x = dat.output.punishmentRates.pbc,
+    file = paste0(outputDir,"Punishment and enrollment by race - PBC.csv"),
+    row.names = F
+  )
+  
+  
+  
+  
