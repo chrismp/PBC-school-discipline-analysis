@@ -48,7 +48,8 @@ func.makePunishmentRateData <- function(dat){
   return(dat.output)
 }
 
-func.percentFormat <- function(x) paste0(x*100,'%')
+func.percentFormatX <- function(x) c( paste0(x[1]*100,'%'), x[-1]*100 )
+func.percentFormatY <- function(y) c( y[1]*100, paste0(y[-1]*100,'%') )
 
 
 ## ENROLLMENT
@@ -170,38 +171,53 @@ func.percentFormat <- function(x) paste0(x*100,'%')
     bold.wt = 700
   )
   
-  chartStyle.backgroundColor <- "#eeefff"
+  chartStyle.backgroundColor <- "#eeeeee"
   chartStyle.lineColor <- "#cccccc"
   chartStyle.trendLineThickness <- 0.5
   chartStyle.scatterplot.dotSize <- 3
   chartStyle.scatterplot.alpha <- 0.75
   
-  chartStyle.text <- theme(
+  chartStyle.theme <- theme(
     plot.title = element_text(
       size = 18,
       family = hedFont,
-      face = "bold",
-      hjust = 0.5
+      face = "bold"#,
+      # hjust = 0.5
     ),
     plot.subtitle = element_text(
       size = 14,
-      hjust = -1.19
+      # hjust = -1.19,
+      margin = margin(
+        b = unit(20, "pt")
+      )
     ),
     plot.caption = element_text(
       size = 10
     ),
     axis.title = element_text(
       face = "bold"
-    )
-  )
-  
-  chartStyle.misc <- theme(
+    ),
     plot.background = element_rect(
       fill = chartStyle.backgroundColor
     ),
-    axis.ticks = element_blank(),
+    axis.ticks = element_line(
+      color = chartStyle.lineColor
+    ),
     panel.background = element_rect(
       fill = chartStyle.backgroundColor
+    ),
+    axis.title.x = element_text(
+      margin = margin(
+        t = 10
+      )
+    ),
+    axis.title.y = element_text(
+      margin = margin(
+        r = 10
+      )
+    ),
+    axis.text = element_text(
+      size = 12
     ),
     panel.grid.major = element_line(
       color = chartStyle.lineColor,
@@ -234,7 +250,7 @@ func.percentFormat <- function(x) paste0(x*100,'%')
     ) + 
     scale_x_continuous(
       name = "Percent of white students punished",
-      labels = func.percentFormat,
+      labels = func.percentFormatX,
       breaks = seq(
         from = min(dat.merge.pbc$PercentOfWhiteStudentsPunished), 
         to = max(dat.merge.pbc$PercentOfWhiteStudentsPunished),
@@ -243,7 +259,7 @@ func.percentFormat <- function(x) paste0(x*100,'%')
     ) +
     scale_y_continuous(
       name = "Percent of black students punished",
-      labels = func.percentFormat,
+      labels = func.percentFormatY,
       expand = c(0,0),
       breaks = seq(
         from = min(dat.merge.pbc$PercentOfBlackStudentsPunished), 
@@ -257,8 +273,7 @@ func.percentFormat <- function(x) paste0(x*100,'%')
       caption = "Source: Florida Dept. of Education"
     ) + 
     coord_cartesian(clip = "off") +
-    chartStyle.text +
-    chartStyle.misc
+    chartStyle.theme
   
   
   
