@@ -1,12 +1,13 @@
 # install.packages("dplyr")
 # install.packages("ggplot2")
-# install.packages('ggthemes', dependencies = TRUE)
 # install.packages("showtext", dependencies = T)
+# install.packages("lettercase")
 
 require(dplyr)
 require(ggplot2)
-require(ggthemes)
 require(showtext)
+require(lettercase)
+require(gridExtra)
 
 
 ## FUNCTIONS
@@ -38,18 +39,26 @@ func.cors <- function(dat){
   return(dat.cor)
 }
 
-func.makePunishmentRateData <- function(dat){
+func.makePunishmentRateData <- function(dat,geography){
   dat.output <- data.frame(
     "Group" = c("Total","Black","Hispanic","White"),
     "Enrollment" = c(  sum(dat$TotalEnrollment), sum(dat$BlackEnrollment), sum(dat$HispanicEnrollment), sum(dat$WhiteEnrollment) ),
     "Punished" = c( sum(dat$TotalPunished), sum(dat$BlackStudentsPunished), sum(dat$HispanicStudentsPunished), sum(dat$WhiteStudentsPunished) )
   )
   dat.output$PunishmentRate <- dat.output$Punished / dat.output$Enrollment
+  dat.output$Geography <- geography
   return(dat.output)
 }
 
 func.percentFormatX <- function(x) c( paste0(x[1]*100,'%'), x[-1]*100 )
-func.percentFormatY <- function(y) c( y[1]*100, paste0(y[-1]*100,'%') )
+func.percentFormatY <- function(y) c(y[1:length(y)-1]*100 , paste0(rev(y)[1]*100,'%'))
+
+func.simpleCap <- function(theString) {
+  x <- tolower(theString) # School names are all caps, so lowercase them here
+  s <- strsplit(x, " ")[[1]]
+  paste(toupper(substring(s, 1,1)), substring(s, 2),
+        sep="", collapse=" ")
+}
 
 
 ## ENROLLMENT
@@ -153,127 +162,234 @@ func.percentFormatY <- function(y) c( y[1]*100, paste0(y[-1]*100,'%') )
     District.x == "PALM BEACH"
   )
   dat.cor.pbc <- func.cors(dat.merge.pbc)
+  # dat.merge.pbc$SchoolCapitalized <- func.simpleCap(dat.merge.pbc$School)
 
   
 # MAKE DATAFRAMES 
-  dat.output.punishmentRates.state <- func.makePunishmentRateData(dat.merge.state)
-  dat.output.punishmentRates.pbc <- func.makePunishmentRateData(dat.merge.pbc)
+  dat.output.punishmentRates.state <- func.makePunishmentRateData(dat = dat.merge.state, geography = "Florida")
+  dat.output.punishmentRates.pbc <- func.makePunishmentRateData(dat = dat.merge.pbc, geography = "Palm Beach County")
+  dat.output.punishmentRates.combined <- rbind(dat.output.punishmentRates.state, dat.output.punishmentRates.pbc)
 
 
 # MAKE CHARTS
   # Pre-styling: Common styles for charts
-  showtext_auto()
-  hedFont <- "News Cycle" # Or 'Pragati Narrow'
-  font_add_google(
-    name = hedFont,
-    family = hedFont,
-    regular.wt = 400,
-    bold.wt = 700
-  )
-  
-  chartStyle.backgroundColor <- "#eeeeee"
-  chartStyle.lineColor <- "#cccccc"
-  chartStyle.trendLineThickness <- 0.5
-  chartStyle.scatterplot.dotSize <- 3
-  chartStyle.scatterplot.alpha <- 0.75
-  
-  chartStyle.theme <- theme(
-    plot.title = element_text(
-      size = 18,
+    showtext_auto()
+    hedFont <- "News Cycle" # Or 'Pragati Narrow'
+    font_add_google(
+      name = hedFont,
       family = hedFont,
-      face = "bold"#,
-      # hjust = 0.5
-    ),
-    plot.subtitle = element_text(
-      size = 14,
-      # hjust = -1.19,
-      margin = margin(
-        b = unit(20, "pt")
-      )
-    ),
-    plot.caption = element_text(
-      size = 10
-    ),
-    axis.title = element_text(
-      face = "bold"
-    ),
-    plot.background = element_rect(
-      fill = chartStyle.backgroundColor
-    ),
-    axis.ticks = element_line(
-      color = chartStyle.lineColor
-    ),
-    panel.background = element_rect(
-      fill = chartStyle.backgroundColor
-    ),
-    axis.title.x = element_text(
-      margin = margin(
-        t = 10
-      )
-    ),
-    axis.title.y = element_text(
-      margin = margin(
-        r = 10
-      )
-    ),
-    axis.text = element_text(
-      size = 12
-    ),
-    panel.grid.major = element_line(
-      color = chartStyle.lineColor,
-      size = 0.25
-    ),
-    panel.grid.minor = element_blank(),
-    axis.line.x = element_line(
-      color = "#000000"
+      regular.wt = 400,
+      bold.wt = 700
     )
-  )
+    
+    chartStyle.backgroundColor <- "#eeeeee"
+    chartStyle.lineColor <- "#cccccc"
+    chartStyle.trendLineThickness <- 0.5
+    chartStyle.scatterplot.dotSize <- 3
+    chartStyle.scatterplot.alpha <- 0.75
+    chartStyle.scatterplot.dotLabelSize <- chartStyle.scatterplot.dotSize * 1.125
+    chartStyle.scatterplot.dotStroke <- 0.5
+    chartStyle.bar.order <- c("Total","White","Hispanic","Black")
+    chartStyle.caption <- "Chris Persaud / Datavizz.com\nSource: Florida Dept. of Education"
+    
+    chartStyle.theme <- theme(
+      plot.title = element_text(
+        size = 18,
+        family = hedFont,
+        face = "bold"#,
+        # hjust = 0.5
+      ),
+      plot.subtitle = element_text(
+        size = 14,
+        # hjust = -1.19,
+        margin = margin(
+          b = unit(20, "pt")
+        )
+      ),
+      plot.caption = element_text(
+        size = 10,
+        face = "italic",
+        color = "#333333"
+      ),
+      axis.title = element_text(
+        face = "bold"
+      ),
+      plot.background = element_rect(
+        fill = chartStyle.backgroundColor
+      ),
+      axis.ticks = element_line(
+        color = chartStyle.lineColor
+      ),
+      panel.background = element_rect(
+        fill = chartStyle.backgroundColor
+      ),
+      axis.title.x = element_text(
+        margin = margin(
+          t = 10
+        )
+      ),
+      axis.title.y = element_text(
+        margin = margin(
+          r = 10
+        )
+      ),
+      axis.text = element_text(
+        size = 12
+      ),
+      panel.grid.major = element_line(
+        color = chartStyle.lineColor,
+        size = 0.25
+      ),
+      panel.grid.minor = element_blank(),
+      axis.line.x = element_line(
+        color = "#000000"
+      )
+    )
+    
+  # Bar chart: Punishment rates by race, PBC vs Florida
+    ggplot(
+      data = dat.output.punishmentRates.combined,
+      aes(
+        fill = Geography,
+        x = reorder(
+          x = Group,
+          -PunishmentRate
+        ),
+        y = PunishmentRate
+      )
+    ) +
+      geom_bar(
+        position = position_dodge2(
+          width = 400,
+          padding = 0
+        ),
+        stat = "identity",
+        width = 0.5
+      ) +
+      scale_fill_manual(
+        values = c("#1f78b4","#b2df8a")
+      ) +
+      scale_x_discrete(
+        limits = chartStyle.bar.order
+      ) +
+      scale_y_continuous(
+        labels = func.percentFormatX,
+        expand = c(0,0),
+        breaks = seq(
+          from = 0, 
+          to = max(dat.output.punishmentRates.combined$PunishmentRate),
+          by = 0.05
+        )
+      ) +
+      geom_text(
+        aes(
+          label = Geography,
+          y = 0
+        ),
+        hjust = 0,
+        position = position_dodge(1)
+      ) +
+      coord_flip() +
+      chartStyle.theme +
+      theme(
+        axis.line.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none",
+        panel.grid.major.y = element_blank()
+      )
   
   # Scatterplot: % white students punished vs % black students punished, by school in PBC
-  ggplot(
-    data = dat.merge.pbc,
-    aes(
-      x = PercentOfWhiteStudentsPunished,
-      y = PercentOfBlackStudentsPunished
-    )
-  ) + 
-    geom_point(
-      size = chartStyle.scatterplot.dotSize,
-      alpha = chartStyle.scatterplot.alpha,
-      color = "#ff8a59"
-    ) +
-    geom_smooth(
-      method = "lm",
-      se = F,
-      size = chartStyle.trendLineThickness,
-      color = "black"
-    ) + 
-    scale_x_continuous(
-      name = "Percent of white students punished",
-      labels = func.percentFormatX,
-      breaks = seq(
-        from = min(dat.merge.pbc$PercentOfWhiteStudentsPunished), 
-        to = max(dat.merge.pbc$PercentOfWhiteStudentsPunished),
-        by = 0.05
+    ggplot(
+      data = dat.merge.pbc,
+      aes(
+        x = PercentOfWhiteStudentsPunished,
+        y = PercentOfBlackStudentsPunished
       )
-    ) +
-    scale_y_continuous(
-      name = "Percent of black students punished",
-      labels = func.percentFormatY,
-      expand = c(0,0),
-      breaks = seq(
-        from = min(dat.merge.pbc$PercentOfBlackStudentsPunished), 
-        to = max(dat.merge.pbc$PercentOfBlackStudentsPunished),
-        by = 0.1
-      )
-    ) +
-    labs(
-      title = "Punishment by race in Palm Beach County, Fla. schools",
-      subtitle = "Punishment rates for black students vs. white students, 2016-17 school year",
-      caption = "Source: Florida Dept. of Education"
     ) + 
-    coord_cartesian(clip = "off") +
-    chartStyle.theme
+      geom_point(
+        size = chartStyle.scatterplot.dotSize,
+        alpha = chartStyle.scatterplot.alpha,
+        fill = "#ff8a59",
+        shape = 21,
+        stroke= ifelse(
+          test = dat.merge.pbc$PercentOfBlackStudentsPunished > 0.6,
+          yes = chartStyle.scatterplot.dotStroke,
+          no = ifelse(
+            test = dat.merge.pbc$PercentOfWhiteStudentsPunished > 0.3,
+            yes = chartStyle.scatterplot.dotStroke,
+            no = 0
+          )
+        )
+      ) +
+      geom_smooth(
+        method = "lm",
+        se = F,
+        size = chartStyle.trendLineThickness,
+        color = "black"
+      ) + 
+      geom_text( # Highlight school with highest rate of punishing black students
+        aes(
+          label = ifelse(
+            test = PercentOfBlackStudentsPunished > 0.6,
+            yes = as.character(
+              x = str_title_case(
+                x = tolower(
+                  x = School
+                )
+              )
+            ),
+            no = ''
+          )
+        ),
+        hjust = 1.06,
+        vjust = 1,
+        size = chartStyle.scatterplot.dotLabelSize
+      ) +
+      geom_text( # Highlight school with highest rate of punishing whites relative to blacks
+        aes(
+          label = ifelse(
+            test = PercentOfWhiteStudentsPunished > 0.3,
+            yes = as.character(
+              x = str_title_case(
+                x = tolower(
+                  x = School
+                )
+              )
+            ),
+            no = ''
+          )
+        ),
+        hjust = 1.04,
+        vjust = 1.5,
+        size = chartStyle.scatterplot.dotLabelSize
+      ) +
+      scale_x_continuous(
+        name = "Percent of white students punished",
+        labels = func.percentFormatX,
+        breaks = seq(
+          from = min(dat.merge.pbc$PercentOfWhiteStudentsPunished), 
+          to = max(dat.merge.pbc$PercentOfWhiteStudentsPunished),
+          by = 0.05
+        )
+      ) +
+      scale_y_continuous(
+        name = "Percent of black students punished",
+        labels = func.percentFormatY,
+        expand = c(0,0),
+        breaks = seq(
+          from = min(dat.merge.pbc$PercentOfBlackStudentsPunished), 
+          to = max(dat.merge.pbc$PercentOfBlackStudentsPunished),
+          by = 0.1
+        )
+      ) +
+      labs(
+        title = "Punishment by race in Palm Beach County, Fla. schools",
+        subtitle = "Punishment rates for black students vs. white students, 2016-17 school year",
+        caption = chartStyle.caption
+      ) + 
+      coord_cartesian(clip = "off") + 
+      chartStyle.theme
   
   
   
