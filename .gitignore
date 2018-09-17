@@ -2,3 +2,4 @@
 output/
 *.Rproj
 .Rproj.user
+*.png
