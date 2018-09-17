@@ -283,11 +283,8 @@ func.simpleCap <- function(theString) {
       ) +
       geom_text(
         aes(
-          label = Geography,
-          y = 0
-        ),
-        hjust = 0,
-        position = position_dodge(1)
+          label = Geography
+        )
       ) +
       coord_flip() +
       chartStyle.theme +
