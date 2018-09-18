@@ -2,12 +2,12 @@
 # install.packages("ggplot2")
 # install.packages("showtext", dependencies = T)
 # install.packages("lettercase")
+# install.packages("gridExtra")
 
 require(dplyr)
 require(ggplot2)
 require(showtext)
 require(lettercase)
-require(gridExtra)
 
 
 ## FUNCTIONS
@@ -211,17 +211,14 @@ func.simpleCap <- function(theString) {
         face = "italic",
         color = "#333333"
       ),
+      axis.line.x = element_line(
+        color = "#000000"
+      ),
       axis.title = element_text(
         face = "bold"
       ),
-      plot.background = element_rect(
-        fill = chartStyle.backgroundColor
-      ),
       axis.ticks = element_line(
         color = chartStyle.lineColor
-      ),
-      panel.background = element_rect(
-        fill = chartStyle.backgroundColor
       ),
       axis.title.x = element_text(
         margin = margin(
@@ -236,14 +233,17 @@ func.simpleCap <- function(theString) {
       axis.text = element_text(
         size = 12
       ),
+      plot.background = element_rect(
+        fill = chartStyle.backgroundColor
+      ),
+      panel.background = element_rect(
+        fill = chartStyle.backgroundColor
+      ),
       panel.grid.major = element_line(
         color = chartStyle.lineColor,
         size = 0.25
       ),
-      panel.grid.minor = element_blank(),
-      axis.line.x = element_line(
-        color = "#000000"
-      )
+      panel.grid.minor = element_blank()
     )
     
   # Bar chart: Punishment rates by race, PBC vs Florida
@@ -259,10 +259,7 @@ func.simpleCap <- function(theString) {
       )
     ) +
       geom_bar(
-        position = position_dodge2(
-          width = 400,
-          padding = 0
-        ),
+        position = "dodge",
         stat = "identity",
         width = 0.5
       ) +
@@ -273,6 +270,7 @@ func.simpleCap <- function(theString) {
         limits = chartStyle.bar.order
       ) +
       scale_y_continuous(
+        name = "Percent of students punished",
         labels = func.percentFormatX,
         expand = c(0,0),
         breaks = seq(
@@ -282,11 +280,22 @@ func.simpleCap <- function(theString) {
         )
       ) +
       geom_text(
+        data = subset(dat.output.punishmentRates.combined, Group == "Black"),
         aes(
-          label = Geography
-        )
+          label = Geography,
+          y = 0.005
+        ),
+        position = position_dodge(0.5),
+        hjust = 0,
+        color = "#ffffff",
+        fontface = "bold"
       ) +
       coord_flip() +
+      labs(
+        title = "Florida schools punish black kids the most",
+        subtitle = "In Palm Beach County, black students were punished three times as often\nas their white peers in 2016-17",
+        caption = chartStyle.caption
+      ) +
       chartStyle.theme +
       theme(
         axis.line.x = element_blank(),
@@ -381,12 +390,27 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        title = "Punishment by race in Palm Beach County, Fla. schools",
-        subtitle = "Punishment rates for black students vs. white students, 2016-17 school year",
+        title = "Black students get punished more in\nPalm Beach County, Fla. school system",
+        subtitle = "Even schools that punished white kids at high rates disciplined black pupils\nmore often in the 2016-17 school year",
         caption = chartStyle.caption
       ) + 
       coord_cartesian(clip = "off") + 
-      chartStyle.theme
+      chartStyle.theme +
+      theme(
+        axis.text.y = element_text(
+          hjust = 0
+        ),
+        plot.title = element_text(
+          margin = margin(
+            b = 5,
+            l = -10
+          )
+          # hjust = 1.5
+        ),
+        plot.subtitle = element_text(
+          # hjust = -0.5
+        )
+      )
   
   
   
