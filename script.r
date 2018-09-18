@@ -182,94 +182,99 @@ func.simpleCap <- function(theString) {
       bold.wt = 700
     )
     
-    chartStyle.backgroundColor <- "#eeeeee"
-    chartStyle.lineColor <- "#cccccc"
-    chartStyle.trendLineThickness <- 0.5
-    chartStyle.scatterplot.dotSize <- 3
-    chartStyle.scatterplot.alpha <- 0.75
-    chartStyle.scatterplot.dotLabelSize <- chartStyle.scatterplot.dotSize * 1.125
-    chartStyle.scatterplot.dotStroke <- 0.5
-    chartStyle.bar.order <- c("Total","White","Hispanic","Black")
-    chartStyle.caption <- "Chris Persaud / Datavizz.com\nSource: Florida Dept. of Education"
+    # Style snippets for all chartd
+      chartStyle.backgroundColor <- "#eeeeee"
+      chartStyle.lineColor <- "#cccccc"
+      chartStyle.trendLineThickness <- 0.5
+      chartStyle.caption <- "Chris Persaud / Datavizz.com\nSource: Florida Dept. of Education"
+      
+    # Style snippets for scatterplots  
+      chartStyle.scatterplot.dotSize <- 3
+      chartStyle.scatterplot.alpha <- 0.75
+      chartStyle.scatterplot.dotLabelSize <- chartStyle.scatterplot.dotSize * 1.125
+      chartStyle.scatterplot.dotStroke <- 0.5
     
-    chartStyle.theme <- theme(
-      plot.title = element_text(
-        size = 18,
-        family = hedFont,
-        face = "bold"#,
-        # hjust = 0.5
-      ),
-      plot.subtitle = element_text(
-        size = 14,
-        # hjust = -1.19,
-        margin = margin(
-          b = unit(20, "pt")
-        )
-      ),
-      plot.caption = element_text(
-        size = 10,
-        face = "italic",
-        color = "#333333"
-      ),
-      axis.line.x = element_line(
-        color = "#000000"
-      ),
-      axis.title = element_text(
-        face = "bold"
-      ),
-      axis.ticks = element_line(
-        color = chartStyle.lineColor
-      ),
-      axis.title.x = element_text(
-        margin = margin(
-          t = 10
-        )
-      ),
-      axis.title.y = element_text(
-        margin = margin(
-          r = 10
-        )
-      ),
-      axis.text = element_text(
-        size = 12
-      ),
-      plot.background = element_rect(
-        fill = chartStyle.backgroundColor
-      ),
-      panel.background = element_rect(
-        fill = chartStyle.backgroundColor
-      ),
-      panel.grid.major = element_line(
-        color = chartStyle.lineColor,
-        size = 0.25
-      ),
-      panel.grid.minor = element_blank()
-    )
+    # ggplot theme() function for all charts
+      chartStyle.theme <- theme(
+        plot.title = element_text(
+          size = 18,
+          family = hedFont,
+          face = "bold"#,
+          # hjust = 0.5
+        ),
+        plot.subtitle = element_text(
+          size = 14,
+          # hjust = -1.19,
+          margin = margin(
+            b = unit(20, "pt")
+          )
+        ),
+        plot.caption = element_text(
+          size = 10,
+          face = "italic",
+          color = "#333333"
+        ),
+        axis.line.x = element_line(
+          color = "#000000"
+        ),
+        axis.title = element_text(
+          face = "bold"
+        ),
+        axis.ticks = element_line(
+          color = chartStyle.lineColor
+        ),
+        axis.title.x = element_text(
+          margin = margin(
+            t = 10
+          )
+        ),
+        axis.title.y = element_text(
+          margin = margin(
+            r = 10
+          )
+        ),
+        axis.text = element_text(
+          size = 12
+        ),
+        plot.background = element_rect(
+          fill = chartStyle.backgroundColor
+        ),
+        panel.background = element_rect(
+          fill = chartStyle.backgroundColor
+        ),
+        panel.grid.major = element_line(
+          color = chartStyle.lineColor,
+          size = 0.25
+        ),
+        panel.grid.minor = element_blank()
+      )
     
   # Bar chart: Punishment rates by race, PBC vs Florida
+    chartStyle.PBCvFL.barWidth <- 0.75
+    dat.output.punishmentRates.combined$Group <- factor(
+      x = dat.output.punishmentRates.combined$Group,
+      levels = c("Total","Black","Hispanic","White") # Rearrange the order in which bars will appear
+    )
     ggplot(
       data = dat.output.punishmentRates.combined,
       aes(
         fill = Group,
-        x = reorder(
-          x = Geography,
-          -PunishmentRate
-        ),
+        x = Geography,
         y = PunishmentRate
       )
     ) +
       geom_bar(
-        position = "dodge",
+        position = position_dodge(),
         stat = "identity",
-        width = 0.5
+        width = chartStyle.PBCvFL.barWidth
       ) +
       scale_fill_manual(
-        values = c("#a6cee3","#1f78b4","#b2df8a","#33a02c")
+        values = c("#66c2a5","#fc8d62","#8da0cb","#e78ac3")
       ) +
       scale_x_discrete(
-        # limits = chartStyle.bar.order
-        limits = c("Palm Beach County","Florida"),
-        labels= c("Palm\nBeach\nCounty","Florida")
+        limits = c("Florida","Palm Beach County"),
+        labels= c("Florida","Palm\nBeach\nCounty"),
+        expand = c(0,chartStyle.PBCvFL.barWidth)
       ) +
       scale_y_continuous(
         name = "Percent of students punished",
@@ -282,12 +287,12 @@ func.simpleCap <- function(theString) {
         )
       ) +
       geom_text(
-        data = subset(dat.output.punishmentRates.combined, Geography == "Florida"),
+        data = subset(dat.output.punishmentRates.combined, Geography == "Palm Beach County"),
         aes(
           label = Group,
           y = 0.005
         ),
-        position = position_dodge(0.5),
+        position = position_dodge(chartStyle.PBCvFL.barWidth),
         hjust = 0,
         color = "#ffffff",
         fontface = "bold"
