@@ -400,8 +400,8 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        title = "Black students get punished more in\nPalm Beach County, Fla. school system",
-        subtitle = "Even schools that punished white kids at high rates disciplined black pupils\nmore often in the 2016-17 school year",
+        title = "Punishment rates, black students vs white",
+        subtitle = "Palm Beach County schools that punished white kids at high rates\ndisciplined black pupils more often in the 2016-17 school year",
         caption = chartStyle.caption
       ) + 
       coord_cartesian(clip = "off") + 
@@ -421,7 +421,91 @@ func.simpleCap <- function(theString) {
           # hjust = -0.5
         )
       )
-  
+    
+  # Scatterplot: Black punishment vs nonblack punishment in PBC
+    ggplot(
+      data = dat.merge.pbc,
+      aes(
+        x = PercentOfNonBlackStudentsPunished,
+        y = PercentOfBlackStudentsPunished
+      )
+    ) + 
+      geom_point(
+        size = chartStyle.scatterplot.dotSize,
+        alpha = chartStyle.scatterplot.alpha,
+        fill = "#ff8a59",
+        shape = 21,
+        stroke= ifelse(
+          test = dat.merge.pbc$PercentOfBlackStudentsPunished > 0.6,
+          yes = chartStyle.scatterplot.dotStroke,
+          no = 0
+        )
+      ) +
+      geom_smooth(
+        method = "lm",
+        se = F,
+        size = chartStyle.trendLineThickness,
+        color = "black"
+      ) + 
+      geom_text( # Highlight school with highest rate of punishing black students
+        aes(
+          label = ifelse(
+            test = PercentOfBlackStudentsPunished > 0.6,
+            yes = as.character(
+              x = str_title_case(
+                x = tolower(
+                  x = School
+                )
+              )
+            ),
+            no = ''
+          )
+        ),
+        hjust = 1.06,
+        vjust = 1,
+        size = chartStyle.scatterplot.dotLabelSize
+      ) +
+      scale_x_continuous(
+        name = "Percent of nonblack students punished",
+        labels = func.percentFormatX,
+        breaks = seq(
+          from = min(dat.merge.pbc$PercentOfNonBlackStudentsPunished), 
+          to = max(dat.merge.pbc$PercentOfNonBlackStudentsPunished),
+          by = 0.05
+        )
+      ) +
+      scale_y_continuous(
+        name = "Percent of black students punished",
+        labels = func.percentFormatY,
+        expand = c(0,0),
+        breaks = seq(
+          from = min(dat.merge.pbc$PercentOfBlackStudentsPunished), 
+          to = max(dat.merge.pbc$PercentOfBlackStudentsPunished),
+          by = 0.1
+        )
+      ) +
+      labs(
+        title = "Punishment rates, black students vs. nonblack",
+        subtitle = "Palm Beach County schools that punish nonblack students  to punished\nblack pupils at higher rates in 2016-17",
+        caption = chartStyle.caption
+      ) + 
+      coord_cartesian(clip = "off") + 
+      chartStyle.theme +
+      theme(
+        axis.text.y = element_text(
+          hjust = 0
+        ),
+        plot.title = element_text(
+          margin = margin(
+            b = 5,
+            l = -10
+          )
+          # hjust = 1.5
+        ),
+        plot.subtitle = element_text(
+          # hjust = -0.5
+        )
+      )
   
   
 # # WRITE TO CSVs
