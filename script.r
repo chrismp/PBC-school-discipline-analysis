@@ -303,7 +303,7 @@ func.simpleCap <- function(theString) {
         axis.line.x = element_blank(),
         axis.ticks.y = element_blank(),
         axis.title.y = element_blank(),
-        axis.text.x = element_text(
+        axis.text.y = element_text(
           hjust = 0
         ),
         legend.position = "none",
