@@ -250,9 +250,9 @@ func.simpleCap <- function(theString) {
     ggplot(
       data = dat.output.punishmentRates.combined,
       aes(
-        fill = Geography,
+        fill = Group,
         x = reorder(
-          x = Group,
+          x = Geography,
           -PunishmentRate
         ),
         y = PunishmentRate
@@ -264,10 +264,12 @@ func.simpleCap <- function(theString) {
         width = 0.5
       ) +
       scale_fill_manual(
-        values = c("#1f78b4","#b2df8a")
+        values = c("#a6cee3","#1f78b4","#b2df8a","#33a02c")
       ) +
       scale_x_discrete(
-        limits = chartStyle.bar.order
+        # limits = chartStyle.bar.order
+        limits = c("Palm Beach County","Florida"),
+        labels= c("Palm\nBeach\nCounty","Florida")
       ) +
       scale_y_continuous(
         name = "Percent of students punished",
@@ -280,9 +282,9 @@ func.simpleCap <- function(theString) {
         )
       ) +
       geom_text(
-        data = subset(dat.output.punishmentRates.combined, Group == "Black"),
+        data = subset(dat.output.punishmentRates.combined, Geography == "Florida"),
         aes(
-          label = Geography,
+          label = Group,
           y = 0.005
         ),
         position = position_dodge(0.5),
@@ -301,6 +303,9 @@ func.simpleCap <- function(theString) {
         axis.line.x = element_blank(),
         axis.ticks.y = element_blank(),
         axis.title.y = element_blank(),
+        axis.text.x = element_text(
+          hjust = 0
+        ),
         legend.position = "none",
         panel.grid.major.y = element_blank()
       )
