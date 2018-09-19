@@ -261,6 +261,9 @@ func.simpleCap <- function(theString) {
       )
     
   # Bar chart: Punishment rates by race, PBC vs Florida
+    chartStyle.PBCvFL.titleLeftMargin <- -0.025
+    chartStyle.PBCvFL.titleTopMargin <- 3.25
+    chartStyle.PBCvFL.subtitleTopMargin <- chartStyle.PBCvFL.titleTopMargin - 0.25
     chartStyle.PBCvFL.barWidth <- 0.75
     dat.output.punishmentRates.combined$Group <- factor(
       x = dat.output.punishmentRates.combined$Group,
@@ -308,27 +311,41 @@ func.simpleCap <- function(theString) {
         color = "#ffffff",
         fontface = "bold"
       ) +
-      coord_flip() +
-      labs(
-        title = "Florida schools punish black kids more than twice as much as white peers",
-        subtitle = "In Palm Beach County, black students were punished three times more often than white pupils\nin the 2016-17 school year",
-        caption = chartStyle.caption
+      labs(caption = chartStyle.caption) +
+      geom_text(
+        x = chartStyle.PBCvFL.titleTopMargin,
+        y = chartStyle.PBCvFL.titleLeftMargin,
+        inherit.aes = F,
+        label = "Florida schools punish black students more then their peers",
+        check_overlap = T,
+        hjust = 0,
+        size = 8,
+        family = hedFont,
+        fontface = "bold"
       ) +
+      geom_text(
+        x = chartStyle.PBCvFL.subtitleTopMargin,
+        y = chartStyle.PBCvFL.titleLeftMargin,
+        inherit.aes = F,
+        label = "In Palm Beach County, black students were punished three times more often than\nwhite pupils in the 2016-17 school year",
+        check_overlap = T,
+        hjust = 0,
+        size = 5,
+        lineheight = 1
+      ) +
+      coord_flip(clip = "off") +
       chartStyle.theme +
       chartStyle.theme.bar + 
       theme(
+        plot.margin = unit(
+          x = c(5,1,1,1),
+          units = "line"
+        ),
         panel.grid.major.y = element_blank(),
         axis.text.y = element_text(
           hjust = 0
-        ),
-        plot.title = element_text(
-          hjust = 2.75
-        ),
-        plot.subtitle = element_text(
-          hjust = 0.25
         )
       )
-    
     chart.PBCvFL
     ggsave(
       filename = "PBCvFL.png",
