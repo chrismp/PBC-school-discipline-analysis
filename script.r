@@ -180,7 +180,8 @@ func.simpleCap <- function(theString) {
     # hedFont <- "News Cycle"
     hedFont <- "Pragati Narrow" # alternative choice for font
 
-    # Style snippets for all chartd
+    # Style snippets for all charts
+      chartStyle.subtitle.lineHeight <- 0.9
       chartStyle.backgroundColor <- "#eeeeee"
       chartStyle.lineColor <- "#cccccc"
       chartStyle.trendLineThickness <- 0.5
@@ -331,7 +332,7 @@ func.simpleCap <- function(theString) {
         check_overlap = T,
         hjust = 0,
         size = 5,
-        lineheight = 1
+        lineheight = chartStyle.subtitle.lineHeight
       ) +
       coord_flip(clip = "off") +
       chartStyle.theme +
@@ -359,6 +360,9 @@ func.simpleCap <- function(theString) {
     )
   
   # Scatterplot: % white students punished vs % black students punished, by school in PBC
+    chartStyle.WhiteBlackPunishmentScatter.titleLeftMargin <- -0.055
+    chartStyle.WhiteBlackPunishmentScatter.titleTopMargin <- 0.76
+    chartStyle.WhiteBlackPunishmentScatter.subtitleTopMargin <- chartStyle.WhiteBlackPunishmentScatter.titleTopMargin - 0.065
     chart.WhiteBlackPunishmentScatter <- ggplot(
       data = dat.merge.pbc,
       aes(
@@ -443,25 +447,40 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        title = "Punishment rates for black students vs white in Palm Beach County",
-        subtitle = "Schools that punished white kids at high rates usually disciplined black pupils more often in the 2016-17 school year",
+        # title = "Punishment rates for black students vs white in Palm Beach County",
+        # subtitle = "Schools that punished white kids at high rates usually disciplined black pupils more often in the 2016-17 school year",
         caption = chartStyle.caption
       ) + 
+      geom_text(
+        x = chartStyle.WhiteBlackPunishmentScatter.titleLeftMargin,
+        y = chartStyle.WhiteBlackPunishmentScatter.titleTopMargin,
+        inherit.aes = F,
+        label = "Punishment rates for black students vs white, Palm Beach County",
+        check_overlap = T,
+        hjust = 0,
+        size = 8,
+        family = hedFont,
+        fontface = "bold"
+      ) +
+      geom_text(
+        x = chartStyle.WhiteBlackPunishmentScatter.titleLeftMargin,
+        y = chartStyle.WhiteBlackPunishmentScatter.subtitleTopMargin,
+        inherit.aes = F,
+        label = "Schools that punished white kids at high rates usually disciplined black pupils\nmore often in the 2016-17 school year",
+        check_overlap = T,
+        hjust = 0,
+        size = 5,
+        lineheight = chartStyle.subtitle.lineHeight
+      ) +
       coord_cartesian(clip = "off") + 
       chartStyle.theme +
       theme(
         axis.text.y = element_text(
           hjust = 0
         ),
-        plot.title = element_text(
-          margin = margin(
-            b = 5,
-            l = -10
-          )
-          # hjust = 1.5
-        ),
-        plot.subtitle = element_text(
-          # hjust = -0.5
+        plot.margin = unit(
+          x = c(5,1,1,1),
+          units = "line"
         )
       )
     
