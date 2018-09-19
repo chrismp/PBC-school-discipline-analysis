@@ -453,7 +453,7 @@ func.simpleCap <- function(theString) {
         x = chartStyle.WhiteBlackPunishmentScatter.titleLeftMargin,
         y = chartStyle.WhiteBlackPunishmentScatter.titleTopMargin,
         inherit.aes = F,
-        label = "Punishment rates for black students vs white",
+        label = "Punishment rates for black students vs. white",
         check_overlap = T,
         hjust = 0,
         size = 8,
@@ -568,7 +568,7 @@ func.simpleCap <- function(theString) {
         x = chartStyle.NonblackBlackPunishmentScatter.titleLeftMargin,
         y = chartStyle.NonblackBlackPunishmentScatter.titleTopMargin,
         inherit.aes = F,
-        label = "Punishment rates for black students vs other groups",
+        label = "Punishment rates for black students vs. other groups",
         check_overlap = T,
         hjust = 0,
         size = 8,
@@ -611,6 +611,9 @@ func.simpleCap <- function(theString) {
     
   # Diverging chart: Black-white punishment disparity by school
   # More info: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#Diverging%20Bars
+  chartStyle.WhiteBlackDisparityBySchool.titleLeftMargin <- -0.67
+  chartStyle.WhiteBlackDisparityBySchool.titleTopMargin <- 154
+  chartStyle.WhiteBlackDisparityBySchool.subtitleTopMargin <- chartStyle.WhiteBlackDisparityBySchool.titleTopMargin - 1.75
   dat.merge.pbc$BlackWhitePunishmentDisparityCategory <- ifelse(
     test = dat.merge.pbc$PunishmentDisparityBlackVsWhite > 0,
     yes = "Black",
@@ -655,27 +658,46 @@ func.simpleCap <- function(theString) {
       labels = func.percentFormatX # Use the x-axis function since this chart's axes will be flipped
     ) +
     labs(
-      title = "Most Palm Beach County schools punish black students more often than white students",
-      subtitle = "Percent of white students punished minus percent of black students punished in the 2016-17 school year",
+      # title = "Most Palm Beach County schools punish black students more often than white students",
+      # subtitle = "Percent of white students punished minus percent of black students punished in the 2016-17 school year",
       caption = chartStyle.caption
     ) +
-    coord_flip() +
+    geom_text(
+      x = chartStyle.WhiteBlackDisparityBySchool.titleTopMargin,
+      y = chartStyle.WhiteBlackDisparityBySchool.titleLeftMargin,
+      inherit.aes = F,
+      label = "Each school's punishment rate for black students vs. white",
+      check_overlap = T,
+      hjust = 0,
+      size = 8,
+      family = hedFont,
+      fontface = "bold"
+    ) +
+    geom_text(
+      x = chartStyle.WhiteBlackDisparityBySchool.subtitleTopMargin, 
+      y = chartStyle.WhiteBlackDisparityBySchool.titleLeftMargin,
+      inherit.aes = F,
+      label = "Percent of white students punished minus percent of black students punished\nduring the 2016-17 school year, Palm Beach County",
+      check_overlap = T,
+      hjust = 0,
+      size = 5,
+      lineheight = chartStyle.subtitle.lineHeight
+    ) +
+    coord_flip(clip = "off") +
     chartStyle.theme +
     chartStyle.theme.bar +
     theme(
-      plot.subtitle = element_text(
-        margin = margin(
-          b = 0
-        )
-      ),
-      axis.text.y = element_text(
+      axis.text = element_text(
         size = 10
+      ),
+      plot.margin = unit(
+        x = c(4,1,1,1),
+        units = "line"
       )
     )
-  
   chart.WhiteBlackDisparityBySchool
   ggsave(
-    filename = "PBC-black-white-punishment-disparity-by-school-diverging-bar.png",
+    filename = "diverging-bar.png",
     plot = chart.WhiteBlackDisparityBySchool,
     device = "png",
     path = plotOutputDir,
