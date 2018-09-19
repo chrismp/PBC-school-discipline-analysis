@@ -1,13 +1,13 @@
 # install.packages("dplyr")
 # install.packages("ggplot2")
-# install.packages("showtext", dependencies = T)
 # install.packages("lettercase")
-# install.packages("gridExtra")
+# install.packages("extrafont")
 
 require(dplyr)
 require(ggplot2)
 require(showtext)
 require(lettercase)
+require(extrafont)
 
 
 ## FUNCTIONS
@@ -172,16 +172,14 @@ func.simpleCap <- function(theString) {
 
 
 # MAKE CHARTS
+  plotOutputDir <- "output/plots/"
+  
   # Pre-styling: Common styles for charts
-    showtext_auto()
-    hedFont <- "News Cycle" # Or 'Pragati Narrow'
-    font_add_google(
-      name = hedFont,
-      family = hedFont,
-      regular.wt = 400,
-      bold.wt = 700
-    )
-    
+    # These fonts only work if your computer has them installed. Get 'em from Google Fonts.
+    # This bash script installs every Google Font on Debian-based OS's: https://gist.github.com/keeferrourke/d29bf364bd292c78cf774a5c37a791db
+    # hedFont <- "News Cycle"
+    hedFont <- "Pragati Narrow" # alternative choice for font
+
     # Style snippets for all chartd
       chartStyle.backgroundColor <- "#eeeeee"
       chartStyle.lineColor <- "#cccccc"
@@ -194,23 +192,23 @@ func.simpleCap <- function(theString) {
       chartStyle.scatterplot.dotLabelSize <- chartStyle.scatterplot.dotSize * 1.125
       chartStyle.scatterplot.dotStroke <- 0.5
     
-    # ggplot theme() function for all charts
+    # ggplot theme() functions for all charts
       chartStyle.theme <- theme(
         plot.title = element_text(
-          size = 18,
+          size = 20,
           family = hedFont,
-          face = "bold"#,
-          # hjust = 0.5
+          face = "bold"
         ),
         plot.subtitle = element_text(
-          size = 14,
-          # hjust = -1.19,
+          size = 13,
+          # family = hedFont,
+          # face = "bold",
           margin = margin(
             b = unit(20, "pt")
           )
         ),
         plot.caption = element_text(
-          size = 10,
+          size = 9,
           face = "italic",
           color = "#333333"
         ),
@@ -246,7 +244,20 @@ func.simpleCap <- function(theString) {
           color = chartStyle.lineColor,
           size = 0.25
         ),
-        panel.grid.minor = element_blank()
+        panel.grid.minor = element_blank(),
+        plot.margin = margin(
+          t = 5,
+          r = 5,
+          b = 5,
+          l = 5
+        )
+      )
+      
+      chartStyle.theme.bar <- theme(
+        axis.line.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none"
       )
     
   # Bar chart: Punishment rates by race, PBC vs Florida
@@ -255,7 +266,7 @@ func.simpleCap <- function(theString) {
       x = dat.output.punishmentRates.combined$Group,
       levels = c("Total","Black","Hispanic","White") # Rearrange the order in which bars will appear
     )
-    ggplot(
+    chart.PBCvFL <- ggplot(
       data = dat.output.punishmentRates.combined,
       aes(
         fill = Group,
@@ -299,24 +310,39 @@ func.simpleCap <- function(theString) {
       ) +
       coord_flip() +
       labs(
-        title = "Florida schools punish black kids the most",
-        subtitle = "In Palm Beach County, black students were punished three times as often\nas their white peers in 2016-17",
+        title = "Florida schools punish black kids more than twice as much as white peers",
+        subtitle = "In Palm Beach County, black students were punished three times more often than white pupils\nin the 2016-17 school year",
         caption = chartStyle.caption
       ) +
       chartStyle.theme +
+      chartStyle.theme.bar + 
       theme(
-        axis.line.x = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.title.y = element_blank(),
+        panel.grid.major.y = element_blank(),
         axis.text.y = element_text(
           hjust = 0
         ),
-        legend.position = "none",
-        panel.grid.major.y = element_blank()
+        plot.title = element_text(
+          hjust = 2.75
+        ),
+        plot.subtitle = element_text(
+          hjust = 0.25
+        )
       )
+    
+    chart.PBCvFL
+    ggsave(
+      filename = "PBCvFL.png",
+      plot = chart.PBCvFL,
+      device = "png",
+      path = plotOutputDir,
+      width = 200,
+      height = 150,
+      units = "mm",
+      dpi = 144
+    )
   
   # Scatterplot: % white students punished vs % black students punished, by school in PBC
-    ggplot(
+    chart.WhiteBlackPunishmentScatter <- ggplot(
       data = dat.merge.pbc,
       aes(
         x = PercentOfWhiteStudentsPunished,
@@ -400,8 +426,8 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        title = "Punishment rates, black students vs white",
-        subtitle = "Palm Beach County schools that punished white kids at high rates\ndisciplined black pupils more often in the 2016-17 school year",
+        title = "Punishment rates for black students vs white in Palm Beach County",
+        subtitle = "Schools that punished white kids at high rates usually disciplined black pupils more often in the 2016-17 school year",
         caption = chartStyle.caption
       ) + 
       coord_cartesian(clip = "off") + 
@@ -422,8 +448,20 @@ func.simpleCap <- function(theString) {
         )
       )
     
+    chart.WhiteBlackPunishmentScatter
+    ggsave(
+      filename = "PBC-black-white-punishment-scatter.png",
+      plot = chart.WhiteBlackPunishmentScatter,
+      device = "png",
+      path = plotOutputDir,
+      width = 200,
+      height = 150,
+      units = "mm",
+      dpi = 144
+    )
+    
   # Scatterplot: Black punishment vs nonblack punishment in PBC
-    ggplot(
+    chart.NonblackBlackPunishmentScatter <- ggplot(
       data = dat.merge.pbc,
       aes(
         x = PercentOfNonBlackStudentsPunished,
@@ -485,8 +523,8 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        title = "Punishment rates, black students vs. nonblack",
-        subtitle = "Palm Beach County schools that punish nonblack students  to punished\nblack pupils at higher rates in 2016-17",
+        title = "Punishment rates for black students vs non-black in Palm Beach County",
+        subtitle = "Schools that punished non-black students usually punished black pupils at higher rates in 2016-17",
         caption = chartStyle.caption
       ) + 
       coord_cartesian(clip = "off") + 
@@ -506,7 +544,94 @@ func.simpleCap <- function(theString) {
           # hjust = -0.5
         )
       )
+    
+    chart.NonblackBlackPunishmentScatter
+    ggsave(
+      filename = "PBC-black-nonblack-punishment-scatter.png",
+      plot = chart.NonblackBlackPunishmentScatter,
+      device = "png",
+      path = plotOutputDir,
+      width = 200,
+      height = 150,
+      units = "mm",
+      dpi = 144
+    )
+    
+  # Diverging chart: Black-white punishment disparity by school
+  # More info: http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html#Diverging%20Bars
+  dat.merge.pbc$BlackWhitePunishmentDisparityCategory <- ifelse(
+    test = dat.merge.pbc$PunishmentDisparityBlackVsWhite > 0,
+    yes = "Black",
+    no= "White"
+  )
+  chart.WhiteBlackDisparityBySchool <- ggplot(
+    data = dat.merge.pbc,
+    aes(
+      x = reorder(
+        as.character(
+          x = str_title_case(
+            x = tolower(
+              x = School
+            )
+          )
+        ),
+        PunishmentDisparityBlackVsWhite
+      ),
+      y = PunishmentDisparityBlackVsWhite,
+      label = PunishmentDisparityBlackVsWhite
+    )
+  ) +
+    geom_bar(
+      stat = "identity",
+      aes(
+        fill = BlackWhitePunishmentDisparityCategory
+      ),
+      width = 0.5
+    ) +
+    scale_fill_manual(
+      # name = "Black-white punishment disparity",
+      values = c("#f1a340","#998ec3")
+    ) +
+    scale_y_continuous(
+      breaks = seq(
+        from = -0.1,
+        to = max(dat.merge.pbc$PunishmentDisparityBlackVsWhite),
+        by = 0.1
+      ),
+      name = element_blank(),
+      position = "right", # Because of coord_flip(), this will put scale up top
+      labels = func.percentFormatX # Use the x-axis function since this chart's axes will be flipped
+    ) +
+    labs(
+      title = "Most Palm Beach County schools punish black students more often than white students",
+      subtitle = "Percent of white students punished minus percent of black students punished in the 2016-17 school year",
+      caption = chartStyle.caption
+    ) +
+    coord_flip() +
+    chartStyle.theme +
+    chartStyle.theme.bar +
+    theme(
+      plot.subtitle = element_text(
+        margin = margin(
+          b = 0
+        )
+      ),
+      axis.text.y = element_text(
+        size = 10
+      )
+    )
   
+  chart.WhiteBlackDisparityBySchool
+  ggsave(
+    filename = "PBC-black-white-punishment-disparity-by-school-diverging-bar.png",
+    plot = chart.WhiteBlackDisparityBySchool,
+    device = "png",
+    path = plotOutputDir,
+    width = 200,
+    height = 800,
+    units = "mm",
+    dpi = 144
+  )
   
 # # WRITE TO CSVs
 #   outputDir <- "output/"
