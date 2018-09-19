@@ -447,15 +447,13 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        # title = "Punishment rates for black students vs white in Palm Beach County",
-        # subtitle = "Schools that punished white kids at high rates usually disciplined black pupils more often in the 2016-17 school year",
         caption = chartStyle.caption
       ) + 
       geom_text(
         x = chartStyle.WhiteBlackPunishmentScatter.titleLeftMargin,
         y = chartStyle.WhiteBlackPunishmentScatter.titleTopMargin,
         inherit.aes = F,
-        label = "Punishment rates for black students vs white, Palm Beach County",
+        label = "Punishment rates for black students vs white",
         check_overlap = T,
         hjust = 0,
         size = 8,
@@ -466,7 +464,7 @@ func.simpleCap <- function(theString) {
         x = chartStyle.WhiteBlackPunishmentScatter.titleLeftMargin,
         y = chartStyle.WhiteBlackPunishmentScatter.subtitleTopMargin,
         inherit.aes = F,
-        label = "Schools that punished white kids at high rates usually disciplined black pupils\nmore often in the 2016-17 school year",
+        label = "Palm Beach County schools that punished white kids at high rates usually disciplined\nblack pupils more often in the 2016-17 school year",
         check_overlap = T,
         hjust = 0,
         size = 5,
@@ -497,6 +495,9 @@ func.simpleCap <- function(theString) {
     )
     
   # Scatterplot: Black punishment vs nonblack punishment in PBC
+    chartStyle.NonblackBlackPunishmentScatter.titleLeftMargin <- -0.063
+    chartStyle.NonblackBlackPunishmentScatter.titleTopMargin <- 0.76
+    chartStyle.NonblackBlackPunishmentScatter.subtitleTopMargin <- chartStyle.NonblackBlackPunishmentScatter.titleTopMargin - 0.065
     chart.NonblackBlackPunishmentScatter <- ggplot(
       data = dat.merge.pbc,
       aes(
@@ -559,25 +560,40 @@ func.simpleCap <- function(theString) {
         )
       ) +
       labs(
-        title = "Punishment rates for black students vs non-black in Palm Beach County",
-        subtitle = "Schools that punished non-black students usually punished black pupils at higher rates in 2016-17",
+        # title = "Punishment rates for black students vs non-black in Palm Beach County",
+        # subtitle = "Schools that punished non-black students usually punished black pupils at higher rates in 2016-17",
         caption = chartStyle.caption
       ) + 
+      geom_text(
+        x = chartStyle.NonblackBlackPunishmentScatter.titleLeftMargin,
+        y = chartStyle.NonblackBlackPunishmentScatter.titleTopMargin,
+        inherit.aes = F,
+        label = "Punishment rates for black students vs other groups",
+        check_overlap = T,
+        hjust = 0,
+        size = 8,
+        family = hedFont,
+        fontface = "bold"
+      ) +
+      geom_text(
+        x = chartStyle.NonblackBlackPunishmentScatter.titleLeftMargin,
+        y = chartStyle.NonblackBlackPunishmentScatter.subtitleTopMargin,
+        inherit.aes = F,
+        label = "Palm Beach County schools that punished non-black students usually punished\nblack pupils at higher rates in 2016-17",
+        check_overlap = T,
+        hjust = 0,
+        size = 5,
+        lineheight = chartStyle.subtitle.lineHeight
+      ) +
       coord_cartesian(clip = "off") + 
       chartStyle.theme +
       theme(
         axis.text.y = element_text(
           hjust = 0
         ),
-        plot.title = element_text(
-          margin = margin(
-            b = 5,
-            l = -10
-          )
-          # hjust = 1.5
-        ),
-        plot.subtitle = element_text(
-          # hjust = -0.5
+        plot.margin = unit(
+          x = c(5,1,1,1),
+          units = "line"
         )
       )
     
